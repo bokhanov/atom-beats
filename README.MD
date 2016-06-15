@@ -75,6 +75,11 @@ __3. Run logstash__
 ```bash
 STREAM=<the name of your stream> AUTH=<your pre shared auth key> logstash --allow-env -f logstash.conf
 ```
+__4. Run filebeat__
+```bash
+cd <directory with filebeat>
+sudo ./filebeat -e -c <absolute path to directory with filebeat yaml>/filebeat.yml
+```
 
 ### Send events to ironSource.Atom using Logstash docker container & docker-compose
 
