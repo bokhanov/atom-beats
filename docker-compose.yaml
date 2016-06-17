@@ -1,0 +1,29 @@
+version: '2'
+services:
+  logstash:
+    image: logstash:2.3.1
+    entrypoint: bash -c "logstash --allow-env -f /etc/logstash/conf.d/logstash.conf"
+    environment:
+     STREAM: ${STREAM} # Your Atom Stream
+     AUTH: ${AUTH} # Your pre-shared key to Atom Stream
+     SDK_VERSION: 1.0.0
+    volumes:
+    # Specify the logstash.conf file path on your host
+    - /Users/kirill.bokhanov/workspace/atom-beats/logstash.conf:/etc/logstash/conf.d/logstash.conf
+
+    #Specify the path of the files that you want logstash to use, can have multiple paths
+    - /var/log/app-logs:/var/log/log-from-host
+    # For more options: https://docs.docker.com/compose/compose-file/#volumes-volume-driver
+  filebeat:
+    image: prima/filebeat:1.2.3
+    links: 
+    - logstash
+    command: bash -c "`sleep 15` ./bin/filebeat -e -v -d "*" -c /etc/filebeat/filebeat.yml"
+    #command: bash -c "netstat"
+    #command: bash -c "`sleep 20` ps"
+    volumes:
+    #Specify the logstash.conf file path on your host
+    - /Users/kirill.bokhanov/workspace/atom-beats/filebeat.yml:/bin/filebeat.yml
+    - /var/log/app-logs:/var/log/log-from-host
+    - /var/run/docker.sock:/tmp/docker.sock
+    - /Users/kirill.bokhanov/workspace/logstash-atom/file.txt:/etc/logstash/file.txt
