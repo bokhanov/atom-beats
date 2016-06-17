@@ -81,31 +81,62 @@ cd <directory with filebeat>
 sudo ./filebeat -e -c <absolute path to directory with filebeat yaml>/filebeat.yml
 ```
 
-### Send events to ironSource.Atom using Logstash docker container & docker-compose
+### Send events to ironSource.Atom using Filebeat, Logstash, docker container & docker-compose
+__1. Create filebeat.yml with the following content:__
+```yaml
+############################# Filebeat ######################################
+filebeat:
+  # List of prospectors to fetch data.
+  prospectors:
+    # Each - is a prospector. Below are the prospector specific configurations
+    -
+      paths:
+        - /var/log/*.log
+        #- c:\programdata\elasticsearch\logs\*
+      input_type: log
+     
+############################# Output ##########################################
 
-__1. Create docker-compose.yaml with the following content:__
+# Configure what outputs to use when sending the data collected by the beat.
+# Multiple outputs may be used.
+output:
+  ### Logstash as output
+  logstash:
+    # The Logstash hosts
+    hosts: ["logstash:5044"]
+```
+__2. Create docker-compose.yml with the following content:__
 ```yaml
 version: '2'
 services:
   logstash:
-    image: logstash:2.3
-    command: bash -c "logstash --allow-env -f /etc/logstash/conf.d/logstash.conf"
+    image: logstash:2.3.1
+    entrypoint: bash -c "logstash --allow-env -f /etc/logstash/conf.d/logstash.conf"
     environment:
      STREAM: ${STREAM} # Your Atom Stream
      AUTH: ${AUTH} # Your pre-shared key to Atom Stream
      SDK_VERSION: 1.0.0
     volumes:
-    ### Specify the logstash.conf file path on your host ###
-    - <path to your logstash.conf file on your host>:/etc/logstash/conf.d/logstash.conf
+    # Specify the logstash.conf file path on your host
+    - <absolute path to yout logstash.conf file>:/etc/logstash/conf.d/logstash.conf
 
-    ### Specify the path of the files that you want logstash to use, can have multiple paths ###
+    #Specify the path of the files that you want logstash to use, can have multiple paths
     - /var/log/app-logs:/var/log/log-from-host
     # For more options: https://docs.docker.com/compose/compose-file/#volumes-volume-driver
-    
-    container_name: logstash-atom
+  filebeat:
+    image: prima/filebeat:1.2.3
+    links: 
+    - logstash
+    command: bash -c "`sleep 15` ./bin/filebeat (-e -v -d "*") -c /etc/filebeat/filebeat.yml"
+    volumes:
+    #Specify the filebeat.yml file path on your host
+    - <absolute path to yout filebeat.yml  file>:/bin/filebeat.yml
+    - /var/log/app-logs:/var/log/log-from-host
+    - /var/run/docker.sock:/tmp/docker.sock
+ 
 ```
 
-__2. Run docker-compose:__
+__3. Run docker-compose:__
 ```bash
 STREAM=<the name of your stream> AUTH=<your pre shared auth key> docker-compose up (-d for detached)
 
