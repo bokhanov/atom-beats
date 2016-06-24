@@ -9,21 +9,16 @@ services:
      SDK_VERSION: 1.0.0
     volumes:
     # Specify the logstash.conf file path on your host
-    - /Users/kirill.bokhanov/workspace/atom-beats/logstash.conf:/etc/logstash/conf.d/logstash.conf
-
-    #Specify the path of the files that you want logstash to use, can have multiple paths
-    - /var/log/app-logs:/var/log/log-from-host
+    - <absolute path to your logstash.conf file>:/etc/logstash/conf.d/logstash.conf
     # For more options: https://docs.docker.com/compose/compose-file/#volumes-volume-driver
   filebeat:
     image: prima/filebeat:1.2.3
     links: 
     - logstash
-    command: bash -c "`sleep 15` ./bin/filebeat -e -v -d "*" -c /etc/filebeat/filebeat.yml"
-    #command: bash -c "netstat"
-    #command: bash -c "`sleep 20` ps"
+    command: bash -c "`sleep 15` ./bin/filebeat -e -c /etc/filebeat/filebeat.yml"
     volumes:
     #Specify the logstash.conf file path on your host
-    - /Users/kirill.bokhanov/workspace/atom-beats/filebeat.yml:/bin/filebeat.yml
-    - /var/log/app-logs:/var/log/log-from-host
-    - /var/run/docker.sock:/tmp/docker.sock
-    - /Users/kirill.bokhanov/workspace/logstash-atom/file.txt:/etc/logstash/file.txt
+    - <absolute path to your filebeat.yml file>:/bin/filebeat.yml
+
+    #Specify the path of the log files that you want filebeat to use
+    - <absolute path to your log file>:/var/log/log-from-host

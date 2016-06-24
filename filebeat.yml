@@ -5,8 +5,7 @@ filebeat:
     # Each - is a prospector. Below are the prospector specific configurations
     -
       paths:
-        - /etc/logstash/file.txt
-        #- c:\programdata\elasticsearch\logs\*
+        - /var/log/log-from-host
       input_type: log
      
 ############################# Output ##########################################
