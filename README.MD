@@ -54,7 +54,7 @@ output {
     http {
         url => "http://track.atom-data.io/"
         headers => {
-            "x-ironsource-atom-sdk-type" => "logstash"
+            "x-ironsource-atom-sdk-type" => "atom-beats"
             "x-ironsource-atom-sdk-version" => "${SDK_VERSION:1.0.0}"
         }
         http_method => "post"
@@ -118,11 +118,9 @@ services:
      SDK_VERSION: 1.0.0
     volumes:
     # Specify the logstash.conf file path on your host
-    - <absolute path to yout logstash.conf file>:/etc/logstash/conf.d/logstash.conf
-
-    #Specify the path of the files that you want logstash to use, can have multiple paths
-    - /var/log/app-logs:/var/log/log-from-host
+    - <absolute path to your logstash.conf file>:/etc/logstash/conf.d/logstash.conf
     # For more options: https://docs.docker.com/compose/compose-file/#volumes-volume-driver
+
   filebeat:
     image: prima/filebeat:1.2.3
     links: 
@@ -132,7 +130,7 @@ services:
     #Specify the filebeat.yml file path on your host
     - <absolute path to yout filebeat.yml  file>:/bin/filebeat.yml
     - /var/log/app-logs:/var/log/log-from-host
-    - /var/run/docker.sock:/tmp/docker.sock
+
  
 ```
 
@@ -155,4 +153,4 @@ MIT
 
 [license-image]: https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square
 [license-url]: LICENSE
-[example-url]: https://github.com/ironSource/atom-logstash/tree/master/example
+[example-url]: https://github.com/ironSource/atom-beats/tree/master/example
